@@ -82,7 +82,9 @@ class IonQDevice(QubitDevice):
 
     def __init__(self, wires, *, target="simulator", shots=1024, api_key=None):
         if shots is None:
-            raise ValueError("The ionq device does not support analytic expectation values.")
+            raise ValueError(
+                "The ionq device does not support analytic expectation values."
+            )
 
         super().__init__(wires=wires, shots=shots)
         self.target = target
@@ -94,7 +96,12 @@ class IonQDevice(QubitDevice):
         self._prob_array = None
         self.histogram = None
         self.circuit = {"qubits": self.num_wires, "circuit": []}
-        self.job = {"lang": "json", "body": self.circuit, "target": self.target}
+        self.job = {
+            "lang": "json",
+            "body": self.circuit,
+            "target": self.target,
+            "shots": self.shots,
+        }
 
     @property
     def operations(self):
@@ -177,7 +184,8 @@ class IonQDevice(QubitDevice):
             # Here, we rearrange the states to match the big-endian ordering
             # expected by PennyLane.
             basis_states = (
-                int(bin(int(k))[2:].rjust(self.num_wires, "0")[::-1], 2) for k in self.histogram
+                int(bin(int(k))[2:].rjust(self.num_wires, "0")[::-1], 2)
+                for k in self.histogram
             )
             idx = np.fromiter(basis_states, dtype=np.int)
 
@@ -193,7 +201,9 @@ class IonQDevice(QubitDevice):
         if shot_range is None and bin_size is None:
             return self.marginal_prob(self.prob, wires)
 
-        return self.estimate_probability(wires=wires, shot_range=shot_range, bin_size=bin_size)
+        return self.estimate_probability(
+            wires=wires, shot_range=shot_range, bin_size=bin_size
+        )
 
     def generate_samples(self):
         number_of_states = 2 ** self.num_wires
